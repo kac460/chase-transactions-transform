@@ -8,3 +8,4 @@ Transforms transaction CSVs downloaded from Chase into the format for https://gi
 3. Place any number of Chase transactions CSVs into `original/`
 4. Run `python3 transform.py`
 5. Copy the outputted CSV into the Google Sheet referenced in [finance-predictions](https://github.com/kac460/finance-predictions) in the `Transactions` tab (e.g. paste into the 1st Expenses column and then Go to `Data` -> `Split into columns`)
+6. For any subsequent runs, you should repeat steps 3-5 above.
