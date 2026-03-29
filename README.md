@@ -1,4 +1,4 @@
-# chase-transactions
+# chase-transactions-transform
 
 Transforms transaction CSVs downloaded from Chase into the format for https://github.com/kac460/finance-predictions.
 
