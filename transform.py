@@ -29,15 +29,17 @@ def transform(original: dict[str, str | float]) -> TransformedTransaction:
         description=capwords(original["Description"]),
     )
 
-
-def plurality_month_transactions(
-    transactions: list[TransformedTransaction],
-) -> list[TransformedTransaction]:
+def extract_plurality_month(transactions: list[TransformedTransaction]):
     month_counts: dict[str, int] = {}
     for txn in transactions:
         month = txn.date.month
         month_counts[month] = month_counts.get(month, 0) + 1
-    plurality_month = max(month_counts, key=month_counts.get)
+    return max(month_counts, key=month_counts.get)
+
+def plurality_month_transactions(
+    transactions: list[TransformedTransaction],
+) -> list[TransformedTransaction]:
+    plurality_month = extract_plurality_month(transactions)
     return [txn for txn in transactions if txn.date.month == plurality_month]
 
 
@@ -82,18 +84,21 @@ def main() -> None:
             transformed_transactions += [
                 transform(transaction) for transaction in csv_reader
             ]
-
-    print(transformed_transactions)
     transformed_transactions.sort(key=lambda txn: txn.date)
     transformed_file_name = f"{run_datetime_str}.csv"
     dicts_for_csv = [
         txn.dict_for_csv() for txn in filtered_transactions(transformed_transactions)
     ]
+    if len(dicts_for_csv) == 0:
+        print(f'No valid transactions in plurality month {extract_plurality_month(transformed_transactions)} to process! Check your data and then manually move to the archive folder if this seems correct.')
+        return
     os.makedirs('transformed', exist_ok=True)
-    with open(f"transformed/{transformed_file_name}", "w", newline="") as f:
+    transformed_file_path = f"transformed/{transformed_file_name}"
+    with open(transformed_file_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=dicts_for_csv[0].keys())
         writer.writeheader()
         writer.writerows(dicts_for_csv)
+        print(f"Transformed transactions written to {transformed_file_path}")
 
     dest_dir = f"original/archive/{run_datetime_str}"
     os.makedirs(dest_dir)
